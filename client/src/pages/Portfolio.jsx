@@ -327,8 +327,8 @@ export function Portfolio() {
 
   /* ── Resume download ────────────────────────────────────── */
   const handleResumeDownload = useCallback(() => {
-    window.open(`${API_URL}/resume/download`, '_blank');
-  }, []);
+  window.open(`${API_URL}/resume`, '_blank');
+}, []);
 
   /* ── Smooth nav scroll ──────────────────────────────────── */
   const scrollTo = useCallback((href) => {
