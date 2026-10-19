@@ -150,11 +150,9 @@ async function startServer() {
 
     console.log("MongoDB connected successfully");
 
-    app.listen(PORT, () => {
-      console.log(
-        `Portfolio backend running at http://localhost:${PORT}`
-      );
-    });
+    app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Portfolio backend running on port ${PORT}`);
+});
   } catch (error) {
     console.error("Failed to start backend:");
     console.error(error.message);
