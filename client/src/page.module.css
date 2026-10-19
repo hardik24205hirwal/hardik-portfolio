@@ -1,0 +1,1690 @@
+/* ═══════════════════════════════════════════════════════════
+   page.module.css — Hardik Portfolio Full Layout
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Root ─────────────────────────────────────────────────── */
+.root {
+  position:       relative;
+  min-height:     100vh;
+  background:     var(--bg);
+  color:          var(--text);
+  font-family:    var(--font-sans);
+  transition:     background-color 0.5s ease, color 0.5s ease;
+  /*
+   * NOTE: overflow-x: hidden was intentionally removed.
+   * It was breaking position:sticky for .projectsSticky because any
+   * non-visible overflow on an ancestor creates a new scroll context,
+   * making the element the scroll container. Since .root has no fixed
+   * height and doesn't scroll, sticky descendants had nothing to
+   * stick to and behaved like position:relative.
+   *
+   * Horizontal overflow is already prevented at the correct level:
+   * globals.css → html, body { overflow-x: hidden }
+   */
+}
+
+/* ── Grain overlay ────────────────────────────────────────── */
+.grain {
+  position:       fixed;
+  inset:          0;
+  z-index:        100;
+  pointer-events: none;
+  opacity:        0.032;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOP BAR
+   ═══════════════════════════════════════════════════════════ */
+.topbar {
+  position:                fixed;
+  top:                     0;
+  left:                    0;
+  right:                   0;
+  z-index:                 40;
+  display:                 flex;
+  align-items:             center;
+  justify-content:         space-between;
+  padding:                 20px 48px;
+  background-color:        var(--nav-bg);
+  backdrop-filter:         blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom:           1px solid var(--nav-border);
+  transition:              background-color 0.5s ease, border-color 0.5s ease;
+  pointer-events:          none;
+}
+
+.topbar > * {
+  pointer-events: auto;
+}
+
+.topLeft {
+  display:     flex;
+  align-items: center;
+  gap:         20px;
+}
+
+.logoLink {
+  display:     flex;
+  align-items: center;
+  gap:         10px;
+}
+
+.logoBox {
+  width:           30px;
+  height:          30px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  border:          1px solid var(--border);
+  font-size:       11px;
+  font-weight:     600;
+  letter-spacing:  0.1em;
+  font-family:     var(--font-sans);
+  color:           var(--text);
+  transition:      border-color 0.3s ease, color 0.3s ease;
+  flex-shrink:     0;
+}
+
+.logoName {
+  font-family:    var(--font-sans);
+  font-size:      11px;
+  font-weight:    500;
+  letter-spacing: 0.22em;
+  color:          var(--text);
+  transition:     color 0.5s ease;
+}
+
+.topDivider {
+  color:       var(--border);
+  font-weight: 300;
+  font-size:   14px;
+  line-height: 1;
+}
+
+.menuTrigger {
+  display:        flex;
+  align-items:    center;
+  gap:            7px;
+  font-family:    var(--font-sans);
+  font-size:      11px;
+  font-weight:    600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color:          var(--text);
+  padding:        4px 0;
+  transition:     opacity 0.2s ease;
+}
+
+.menuTrigger:hover { opacity: 0.6; }
+
+.menuDot {
+  width:         6px;
+  height:        6px;
+  border-radius: 50%;
+  background:    var(--text);
+  flex-shrink:   0;
+  transition:    background 0.5s ease;
+}
+
+.topRight {
+  display:     flex;
+  align-items: center;
+}
+
+/* ── Theme pill ──────────────────────────────────────────── */
+.themePill {
+  display:       flex;
+  align-items:   center;
+  gap:           2px;
+  border:        1px solid var(--border);
+  border-radius: 100px;
+  padding:       3px;
+  background:    var(--pill-bg);
+  transition:    border-color 0.5s ease;
+}
+
+.pillLabel {
+  padding:        2px 10px;
+  border-radius:  100px;
+  font-family:    var(--font-mono);
+  font-size:      10px;
+  font-weight:    500;
+  letter-spacing: 0.15em;
+  transition:     all 0.3s ease;
+  white-space:    nowrap;
+}
+
+.pillActive {
+  background: var(--text);
+  color:       var(--bg);
+}
+
+.pillInactive {
+  color:   var(--text-muted);
+  background: transparent;
+}
+
+/* ── Home Independent Interest Text (Fixed to Home layer) ─── */
+.identity,
+.homeIdentity {
+  display:        flex;
+  flex-direction: column;
+  align-items:    flex-end;
+  font-family:    var(--font-sans);
+  font-size:      10px;
+  letter-spacing: 0.18em;
+  font-weight:    500;
+  line-height:    1.7;
+  color:          var(--text);
+  transition:     color 0.5s ease;
+}
+
+.homeIdentity {
+  position:       absolute;
+  top:            90px;
+  right:          48px;
+  z-index:        10;
+  pointer-events: none;
+  user-select:    none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HOME SECTION
+   ═══════════════════════════════════════════════════════════ */
+.homeSection {
+  position:        relative;
+  width:           100%;
+  height:          100svh;
+  min-height:      600px;
+  display:         flex;
+  flex-direction:  column;
+  justify-content: flex-end;
+  align-items:     stretch;
+  overflow:        hidden;
+}
+
+/* ── Shared Portrait — fixed layer, one instance for Home + About ─── */
+/*
+ * position:fixed keeps the portrait on-screen as the user scrolls
+ * from Home into About. It is ONE DOM node shared by both sections.
+ * The parallax RAF loop writes transform to this element.
+ * The scroll fade listener writes opacity to this element.
+ * z-index 5 = above bg, below all text (z-index ≥ 10).
+ */
+.portraitFixed {
+  position:       fixed;
+  bottom:         0;
+  left:           50%;
+  transform:      translateX(-50%);   /* overridden each frame by parallax RAF */
+  z-index:        5;
+  pointer-events: none;
+  will-change:    transform, opacity;
+  height:         90svh;
+  max-height:     95vh;
+  display:        flex;
+  align-items:    flex-end;
+  justify-content: center;
+}
+
+.portraitImg {
+  height:          100%;
+  width:           auto;
+  max-width:       none;
+  object-fit:      contain;
+  object-position: bottom center;
+  user-select:     none;
+  /*
+   * Day mode: multiply hides the white PNG background over the cream bg.
+   * Night mode: normal — portrait shows as-is, NEVER inverted.
+   */
+  mix-blend-mode: multiply;
+  filter:         contrast(1.05);
+}
+
+[data-theme="night"] .portraitFixed .portraitImg {
+  mix-blend-mode: normal;
+  filter:         none;
+}
+
+/* ── Hero content bottom-left ─────────────────────────────── */
+.heroContent {
+  position: relative;
+  z-index:  20;
+  padding:  0 48px 32px;
+  display:  flex;
+  flex-direction: column;
+  gap:      4px;
+}
+
+.heroMeta {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+  flex-wrap:   wrap;
+  margin-bottom: 6px;
+}
+
+.metaRow {
+  display:     flex;
+  align-items: center;
+  gap:         7px;
+}
+
+.statusDot {
+  display:       inline-block;
+  width:         7px;
+  height:        7px;
+  border-radius: 50%;
+  background:    #22c55e;
+  flex-shrink:   0;
+}
+
+.metaText {
+  font-family:    var(--font-sans);
+  font-size:      10px;
+  font-weight:    600;
+  letter-spacing: 0.2em;
+  color:          var(--text);
+  transition:     color 0.5s ease;
+}
+
+.metaDivider {
+  color:   var(--text-muted);
+  opacity: 0.5;
+  font-size: 12px;
+}
+
+.metaCoord {
+  font-family:    var(--font-mono);
+  font-size:      10px;
+  letter-spacing: 0.2em;
+  color:          var(--text-muted);
+}
+
+.archiveLabel {
+  font-family:    var(--font-mono);
+  font-size:      10px;
+  letter-spacing: 0.24em;
+  color:          var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom:  4px;
+}
+
+.heroName {
+  margin-left: -3px;
+}
+
+/* ── Right pillars ────────────────────────────────────────── */
+.pillars {
+  position:   absolute;
+  right:      48px;
+  bottom:     40px;
+  z-index:    20;
+  display:    flex;
+  flex-direction: column;
+  align-items:    flex-end;
+  gap:            20px;
+}
+
+.pillar {
+  display:    flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap:         2px;
+  cursor:      pointer;
+}
+
+.pillarNum {
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  color:          var(--text-muted);
+  letter-spacing: 0.2em;
+}
+
+.pillarLabel {
+  font-family:    var(--font-mono);
+  font-size:      10px;
+  font-weight:    700;
+  letter-spacing: 0.25em;
+  color:          var(--text);
+  transition:     color 0.3s ease, transform 0.3s ease;
+}
+
+.pillar:hover .pillarLabel {
+  transform: translateX(-2px);
+}
+
+.pillarLine {
+  width:      14px;
+  height:     1px;
+  background: var(--border);
+  align-self: flex-end;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ABOUT SECTION
+   ═══════════════════════════════════════════════════════════ */
+.aboutSection {
+  position:        relative;
+  width:           100%;
+  min-height:      100svh;
+  overflow:        hidden;
+  border-top:      1px solid var(--border);
+  display:         flex;
+  flex-direction:  column;
+}
+
+/* ── About inner content ─────────────────────────────────── */
+/*
+ * No portrait inside this section — the shared fixed portrait
+ * (.portraitFixed) continues from Home into About.
+ * Three-column structure:
+ *   [left text col] [portrait gap — center ~28%] [right text col]
+ */
+.aboutInner {
+  position:        relative;
+  z-index:         10;   /* above the fixed portrait at z-index: 5 */
+  width:           100%;
+  padding:         90px 48px 80px;
+  display:         flex;
+  flex-direction:  column;
+  gap:             40px;
+}
+
+
+/* ── Title block — top-left ───────────────────────────────── */
+.aboutTitleBlock {
+  display:        flex;
+  flex-direction: column;
+  gap:            6px;
+  max-width:      420px; /* keep title from spreading across full width */
+}
+
+.aboutLabel {
+  font-family:    var(--font-mono);
+  font-size:      10px;
+  letter-spacing: 0.22em;
+  color:          var(--text-muted);
+  text-transform: uppercase;
+}
+
+.aboutTitle {
+  font-family:    var(--font-display);
+  /*
+   * Deliberately smaller than Home's HARDIK.
+   * Large enough to be editorial and dominant, not so large it
+   * fills the entire viewport and covers the portrait.
+   */
+  font-size:      clamp(3rem, 7vw, 6rem);
+  font-weight:    900;
+  letter-spacing: -0.04em;
+  line-height:    0.88;
+  color:          var(--text);
+  text-transform: uppercase;
+  transition:     color 0.5s ease;
+}
+
+/* ── Two-column text layout beside portrait gap ───────────── */
+/*
+ * Uses a 3-track grid: left text | empty portrait zone | right text
+ * This ensures text stays on the edges, leaving center clear for portrait.
+ */
+.aboutColumns {
+  display:               grid;
+  grid-template-columns: 1fr 28% 1fr;
+  gap:                   40px 0;
+  align-items:           start;
+}
+
+.aboutCol {
+  display:        flex;
+  flex-direction: column;
+  gap:            14px;
+}
+
+.colIndex {
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  letter-spacing: 0.2em;
+  color:          var(--text-muted);
+  text-transform: uppercase;
+  display:        block;
+  padding-bottom: 10px;
+  border-bottom:  1px solid var(--border);
+}
+
+.colBody {
+  font-family:  var(--font-sans);
+  font-size:    clamp(0.85rem, 1.4vw, 1rem);
+  line-height:  1.72;
+  color:        var(--text);
+  opacity:      0.88;
+  transition:   color 0.5s ease;
+}
+
+/* Academic */
+.academic {
+  display:        flex;
+  flex-direction: column;
+  gap:            3px;
+  padding-top:    16px;
+  border-top:     1px solid var(--border);
+  margin-top:     6px;
+}
+
+.academicLine {
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  letter-spacing: 0.18em;
+  color:          var(--text-muted);
+  text-transform: uppercase;
+  line-height:    1.8;
+}
+
+/* Resume download button */
+.resumeBtn {
+  margin-top:     16px;
+  padding:        12px 28px;
+  background:     var(--text);
+  color:          var(--bg);
+  font-family:    var(--font-mono);
+  font-size:      10px;
+  font-weight:    700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border:         1px solid var(--text);
+  cursor:         pointer;
+  transition:     background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  border-radius:  0;
+  align-self:     flex-start;
+}
+
+.resumeBtn:hover {
+  background: transparent;
+  color:      var(--text);
+  transform:  translateX(3px);
+}
+
+/* Indicators */
+.aboutIndicators {
+  display:     flex;
+  align-items: center;
+  gap:         10px;
+  margin-top:  auto;
+  padding-top: 20px;
+  flex-wrap:   wrap;
+}
+
+.indicator {
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  font-weight:    700;
+  letter-spacing: 0.2em;
+  color:          var(--text);
+  transition:     color 0.5s ease;
+}
+
+.indicatorDot {
+  width:         4px;
+  height:        4px;
+  border-radius: 50%;
+  background:    var(--border);
+  flex-shrink:   0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PROJECTS SECTION — Simple horizontal carousel
+   ═══════════════════════════════════════════════════════════
+ *
+ * Architecture:
+ *   .projectsSection  — normal flow section, no sticky, no pinning.
+ *   .carouselViewport — overflow:hidden wrapper that clips.
+ *   .sliderTrack      — flex row, translateX driven by JS carousel logic.
+ *   Cards are compact and smaller than viewport so neighbors peek.
+ */
+.projectsSection {
+  position:   relative;
+  width:      100%;
+  border-top: 1px solid var(--border);
+  padding:    80px 0 60px;
+}
+
+.projectsHeader {
+  display:         flex;
+  align-items:     flex-end;
+  justify-content: space-between;
+  padding:         0 48px 32px;
+  flex-wrap:       wrap;
+  gap:             16px;
+}
+
+.sectionLabel {
+  display:        block;
+  font-family:    var(--font-mono);
+  font-size:      10px;
+  letter-spacing: 0.22em;
+  color:          var(--text-muted);
+  margin-bottom:  8px;
+}
+
+.projectsTitle {
+  font-family:    var(--font-display);
+  font-size:      clamp(2rem, 5.5vw, 6rem);
+  font-weight:    900;
+  letter-spacing: -0.04em;
+  line-height:    0.85;
+  color:          var(--text);
+  text-transform: uppercase;
+  transition:     color 0.5s ease;
+}
+
+/* ── Carousel controls ───────────────────────────────────── */
+.carouselControls {
+  display:     flex;
+  align-items: center;
+  gap:         14px;
+}
+
+.carouselCounter {
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  letter-spacing: 0.15em;
+  color:          var(--text-muted);
+}
+
+.carouselBtn {
+  width:           40px;
+  height:          40px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  border:          1px solid var(--border);
+  background:      transparent;
+  color:           var(--text);
+  font-size:       16px;
+  transition:      all 0.25s ease;
+  cursor:          pointer;
+}
+
+.carouselBtn:hover:not(:disabled) {
+  background:   var(--text);
+  color:        var(--bg);
+  border-color: var(--text);
+}
+
+.carouselBtn:disabled {
+  opacity: 0.3;
+  cursor:  not-allowed;
+}
+
+/* ── Carousel viewport & track ───────────────────────────── */
+.carouselViewport {
+  overflow:    hidden;
+  width:       100%;
+  padding:     0 0 0 48px;
+}
+
+.sliderTrack {
+  display:        flex;
+  flex-direction: row;
+  gap:            20px;
+  cursor:         grab;
+  user-select:    none;
+  will-change:    transform;
+  /* right padding so last card has breathing room */
+  padding-right:  48px;
+}
+
+/* ── Project card — compact, clean ───────────────────────── */
+.projectCard {
+  flex-shrink:    0;
+  width:          clamp(300px, 38vw, 420px);
+  border:         1px solid var(--border);
+  display:        flex;
+  flex-direction: column;
+  overflow:       hidden;
+  cursor:         pointer;
+  transition:     border-color 0.3s ease, transform 0.3s ease;
+  position:       relative;
+  background:     var(--card-bg);
+}
+
+.projectCard:hover {
+  border-color: var(--text);
+  transform:    translateY(-4px);
+}
+
+.projectCard:focus-visible {
+  outline:        2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* ── Upper image area ────────────────────────────────────── */
+.cardImage {
+  position:   relative;
+  width:      100%;
+  height:     clamp(180px, 22vw, 260px);
+  overflow:   hidden;
+  background: var(--card-bg);
+  flex-shrink: 0;
+}
+
+/* Actual project image */
+.cardImg {
+  width:            100%;
+  height:           100%;
+  object-fit:       cover;
+  object-position:  center;
+  display:          block;
+  transition:       transform 0.5s ease;
+  pointer-events:   none;
+}
+
+.projectCard:hover .cardImg {
+  transform: scale(1.03);
+}
+
+/* Hover overlay */
+.cardOverlay {
+  position:   absolute;
+  inset:      0;
+  background: linear-gradient(160deg, transparent 40%, rgba(0,0,0,0.18) 100%);
+  opacity:    0;
+  transition: opacity 0.4s ease;
+}
+
+.projectCard:hover .cardOverlay { opacity: 1; }
+
+/* ── Lower information area ──────────────────────────────── */
+.cardFooter {
+  padding:        16px 20px 18px;
+  display:        flex;
+  flex-direction: column;
+  gap:            4px;
+  border-top:     1px solid var(--border);
+  flex-shrink:    0;
+}
+
+.cardCategory {
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  letter-spacing: 0.22em;
+  color:          var(--text-muted);
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  font-family:    var(--font-sans);
+  font-size:      clamp(0.9rem, 1.3vw, 1.1rem);
+  font-weight:    600;
+  color:          var(--text);
+  letter-spacing: -0.01em;
+  line-height:    1.25;
+  transition:     color 0.5s ease;
+}
+
+.cardMeta {
+  display:        flex;
+  flex-direction: column;
+  gap:            2px;
+  margin-top:     6px;
+}
+
+.cardMetaItem {
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  letter-spacing: 0.1em;
+  color:          var(--text-muted);
+  line-height:    1.5;
+}
+
+.cardOverview {
+  font-family:  var(--font-sans);
+  font-size:    12px;
+  line-height:  1.6;
+  color:        var(--text);
+  opacity:      0.75;
+  margin-top:   8px;
+  display:      -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow:     hidden;
+}
+
+.cardActions {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+  margin-top:  10px;
+  flex-wrap:   wrap;
+}
+
+.cardCTA {
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  letter-spacing: 0.18em;
+  color:          var(--text-muted);
+  transition:     color 0.3s ease, transform 0.2s ease;
+  display:        inline-flex;
+  align-items:    center;
+  gap:            6px;
+}
+
+.projectCard:hover .cardCTA {
+  color:     var(--text);
+  transform: translateX(4px);
+}
+
+.cardGithubBtn {
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  font-weight:    700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding:        6px 14px;
+  border:         1px solid var(--border);
+  color:          var(--text);
+  background:     transparent;
+  transition:     all 0.25s ease;
+  text-decoration: none;
+}
+
+.cardGithubBtn:hover {
+  background:   var(--text);
+  color:        var(--bg);
+  border-color: var(--text);
+}
+
+/* ── Dot indicators ──────────────────────────────────────── */
+.carouselDots {
+  display:         flex;
+  justify-content: center;
+  gap:             10px;
+  padding-top:     28px;
+}
+
+.carouselDot {
+  width:         10px;
+  height:        10px;
+  border-radius: 50%;
+  border:        1px solid var(--border);
+  background:    transparent;
+  cursor:        pointer;
+  transition:    all 0.3s ease;
+  padding:       0;
+}
+
+.carouselDotActive {
+  background:   var(--text);
+  border-color: var(--text);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SKILLS SECTION
+   ═══════════════════════════════════════════════════════════ */
+.skillsSection {
+  position:         relative;
+  width:            100%;
+  border-top:       1px solid var(--border);
+  padding:          100px 48px;
+  background-color: var(--bg);
+  transition:       background-color 0.5s ease, border-color 0.5s ease;
+}
+
+.skillsInner {
+  width:          100%;
+  max-width:      1240px;
+  margin:         0 auto;
+  display:        flex;
+  flex-direction: column;
+  gap:            52px;
+}
+
+.skillsHeader {
+  display:        flex;
+  flex-direction: column;
+  gap:            8px;
+}
+
+.skillsTitle {
+  font-family:    var(--font-display);
+  font-size:      clamp(2.4rem, 6vw, 6.5rem);
+  font-weight:    900;
+  letter-spacing: -0.04em;
+  line-height:    0.85;
+  color:          var(--text);
+  text-transform: uppercase;
+  transition:     color 0.5s ease;
+}
+
+.skillsGrid {
+  display:               grid;
+  grid-template-columns: 1fr 1fr;
+  gap:                   36px;
+  align-items:           flex-start;
+}
+
+.skillCategoryCard {
+  background:     var(--card-bg);
+  border:         1px solid var(--border);
+  border-radius:  20px;
+  padding:        36px 36px 40px;
+  display:        flex;
+  flex-direction: column;
+  gap:            32px;
+  transition:     border-color 0.3s ease, background-color 0.5s ease;
+}
+
+.skillCategoryCard:hover {
+  border-color: rgba(18, 19, 24, 0.25);
+}
+
+[data-theme="night"] .skillCategoryCard:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.categoryHeader {
+  display:        flex;
+  align-items:    center;
+  gap:            12px;
+  padding-bottom: 18px;
+  border-bottom:  1px solid var(--border);
+}
+
+.categoryNum {
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  font-weight:    700;
+  letter-spacing: 0.15em;
+  color:          var(--text-muted);
+}
+
+.categoryTitle {
+  font-family:    var(--font-sans);
+  font-size:      13px;
+  font-weight:    700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color:          var(--text);
+}
+
+.skillsList {
+  display:        flex;
+  flex-direction: column;
+  gap:            24px;
+}
+
+.skillItem {
+  display:        flex;
+  flex-direction: column;
+  gap:            10px;
+}
+
+.skillMeta {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     baseline;
+}
+
+.skillName {
+  font-family:    var(--font-sans);
+  font-size:      15px;
+  font-weight:    500;
+  letter-spacing: 0.02em;
+  color:          var(--text);
+  transition:     color 0.5s ease;
+}
+
+.skillPercent {
+  font-family:    var(--font-mono);
+  font-size:      13px;
+  font-weight:    600;
+  letter-spacing: 0.08em;
+  color:          var(--text-muted);
+  transition:     color 0.5s ease;
+}
+
+.progressBarTrack {
+  width:            100%;
+  height:           6px;
+  background-color: var(--pill-bg);
+  border-radius:    999px;
+  overflow:         hidden;
+}
+
+.progressBarFill {
+  height:           100%;
+  background-color: var(--text);
+  border-radius:    999px;
+  transition:       width 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONTACT SECTION
+   ═══════════════════════════════════════════════════════════ */
+.contactSection {
+  position:   relative;
+  width:      100%;
+  min-height: 100svh;
+  border-top: 1px solid var(--border);
+  display:    flex;
+  align-items: center;
+}
+
+.contactInner {
+  width:   100%;
+  padding: 100px 48px 80px;
+  display: flex;
+  flex-direction: column;
+  gap:     56px;
+  max-width: 760px;
+}
+
+.contactTitleBlock {
+  display:        flex;
+  flex-direction: column;
+  gap:            8px;
+}
+
+.contactTitle {
+  font-family:    var(--font-display);
+  font-size:      clamp(3rem, 8vw, 8rem);
+  font-weight:    900;
+  letter-spacing: -0.04em;
+  line-height:    0.85;
+  color:          var(--text);
+  text-transform: uppercase;
+  transition:     color 0.5s ease;
+}
+
+.contactIntro {
+  font-family:  var(--font-sans);
+  font-size:    clamp(0.85rem, 1.4vw, 1rem);
+  color:        var(--text-muted);
+  line-height:  1.65;
+  max-width:    480px;
+  margin-top:   8px;
+}
+
+/* ── Form ─────────────────────────────────────────────────── */
+.contactForm {
+  display:        flex;
+  flex-direction: column;
+  gap:            24px;
+}
+
+.formGroup {
+  display:        flex;
+  flex-direction: column;
+  gap:            8px;
+}
+
+.formLabel {
+  font-family:    var(--font-mono);
+  font-size:      10px;
+  letter-spacing: 0.2em;
+  color:          var(--text-muted);
+  text-transform: uppercase;
+}
+
+.formInput {
+  width:          100%;
+  background:     transparent;
+  border:         none;
+  border-bottom:  1px solid var(--border);
+  padding:        12px 0;
+  font-family:    var(--font-sans);
+  font-size:      15px;
+  color:          var(--text);
+  outline:        none;
+  transition:     border-color 0.3s ease, color 0.5s ease;
+  border-radius:  0;
+}
+
+.formInput::placeholder {
+  color:   var(--text-muted);
+  opacity: 0.65;
+}
+
+.formInput:focus {
+  border-bottom-color: var(--text);
+}
+
+.formTextarea {
+  resize:     vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.submitBtn {
+  align-self:     flex-start;
+  padding:        14px 32px;
+  background:     var(--text);
+  color:          var(--bg);
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  font-weight:    700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border:         1px solid var(--text);
+  transition:     background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  border-radius:  0;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: transparent;
+  color:      var(--text);
+  transform:  translateX(3px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor:  not-allowed;
+}
+
+/* Form status messages */
+.formStatusMsg {
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  letter-spacing: 0.12em;
+  padding:        10px 0;
+  line-height:    1.6;
+}
+
+.formSuccess {
+  color: #4caf50;
+}
+
+.formError {
+  color: #ef5350;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MENU OVERLAY
+   ═══════════════════════════════════════════════════════════ */
+.menuOverlay {
+  position:         fixed;
+  inset:            0;
+  z-index:          50;
+  background:       var(--bg);
+  color:            var(--text);
+  display:          flex;
+  flex-direction:   column;
+  justify-content:  space-between;
+  padding:          24px 48px;
+  overflow-y:       auto;
+  transform:        translateY(-100%);
+  transition:       transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                    background-color 0.5s ease,
+                    color 0.5s ease;
+}
+
+.menuOpen {
+  transform: translateY(0);
+}
+
+.menuBackdrop {
+  display: none;
+}
+
+.menuTopBar {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding-bottom:  24px;
+  border-bottom:   1px solid var(--border);
+}
+
+.menuLogoRow {
+  display:     flex;
+  align-items: center;
+  gap:         10px;
+}
+
+.menuDirLabel {
+  font-family:    var(--font-sans);
+  font-size:      11px;
+  font-weight:    500;
+  letter-spacing: 0.25em;
+  color:          var(--text);
+}
+
+.menuClose {
+  display:        flex;
+  align-items:    center;
+  gap:            8px;
+  font-family:    var(--font-sans);
+  font-size:      11px;
+  font-weight:    600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text);
+  transition:     opacity 0.2s ease;
+}
+
+.menuClose:hover { opacity: 0.5; }
+
+/* Menu nav links */
+.menuNav {
+  display:        flex;
+  flex-direction: column;
+  gap:            8px;
+  padding:        40px 0;
+  margin:         auto 0;
+}
+
+.menuNavLink {
+  display:         flex;
+  align-items:     baseline;
+  gap:             24px;
+  font-family:     var(--font-display);
+  font-size:       clamp(3rem, 9vw, 9rem);
+  font-weight:     800;
+  letter-spacing:  -0.03em;
+  text-transform:  uppercase;
+  color:           var(--text);
+  transition:      transform 0.3s ease, opacity 0.3s ease;
+  line-height:     1;
+}
+
+.menuNavLink:hover {
+  transform: translateX(12px);
+  opacity:   0.75;
+}
+
+.menuNavNum {
+  font-family:    var(--font-mono);
+  font-size:      clamp(0.6rem, 1.2vw, 1rem);
+  font-weight:    400;
+  color:          var(--text-muted);
+  letter-spacing: 0.15em;
+  transition:     color 0.3s ease;
+}
+
+.menuNavLink:hover .menuNavNum {
+  color: var(--text);
+}
+
+/* Menu footer */
+.menuFooter {
+  display:         flex;
+  justify-content: space-between;
+  flex-wrap:       wrap;
+  gap:             16px;
+  padding-top:     24px;
+  border-top:      1px solid var(--border);
+  font-family:     var(--font-mono);
+  font-size:       11px;
+  letter-spacing:  0.14em;
+}
+
+.menuFooterLabel {
+  display:        block;
+  color:          var(--text-muted);
+  text-transform: uppercase;
+  font-size:      9px;
+  margin-bottom:  4px;
+}
+
+.menuFooterLink:hover {
+  text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PROJECT MODAL
+   ═══════════════════════════════════════════════════════════ */
+.modalBackdrop {
+  position: fixed;
+  inset:    0;
+  z-index:  55;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal {
+  position:         fixed;
+  top:              50%;
+  left:             50%;
+  transform:        translate(-50%, -50%) scale(0.9);
+  z-index:          60;
+  width:            min(720px, 92vw);
+  max-height:       88vh;
+  background:       var(--bg);
+  border:           1px solid var(--border);
+  overflow-y:       auto;
+  opacity:          0;
+  pointer-events:   none;
+  transition:       transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                    opacity 0.3s ease,
+                    background-color 0.5s ease;
+}
+
+.modalOpen {
+  transform:      translate(-50%, -50%) scale(1);
+  opacity:        1;
+  pointer-events: auto;
+}
+
+.modal::-webkit-scrollbar { width: 3px; }
+.modal::-webkit-scrollbar-thumb { background: var(--border); }
+
+.modalClose {
+  position:       sticky;
+  top:            0;
+  z-index:        2;
+  display:        flex;
+  align-items:    center;
+  gap:            8px;
+  padding:        14px 24px;
+  width:          100%;
+  font-family:    var(--font-mono);
+  font-size:      10px;
+  font-weight:    700;
+  letter-spacing: 0.2em;
+  color:          var(--text-muted);
+  background:     var(--bg);
+  border-bottom:  1px solid var(--border);
+  transition:     color 0.2s ease, background 0.5s ease;
+}
+
+.modalClose:hover { color: var(--text); }
+
+.modalImageArea {
+  width:    100%;
+  height:   clamp(200px, 35vw, 380px);
+  overflow: hidden;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+
+.modalImg {
+  width:           100%;
+  height:          100%;
+  object-fit:      cover;
+  object-position: center;
+  display:         block;
+}
+
+.modalContent {
+  padding:        32px 36px 40px;
+  display:        flex;
+  flex-direction: column;
+  gap:            16px;
+}
+
+.modalCategory {
+  font-family:    var(--font-mono);
+  font-size:      10px;
+  letter-spacing: 0.2em;
+  color:          var(--text-muted);
+  text-transform: uppercase;
+}
+
+.modalTitle {
+  font-family:    var(--font-display);
+  font-size:      clamp(1.4rem, 3.5vw, 2.2rem);
+  font-weight:    800;
+  letter-spacing: -0.02em;
+  color:          var(--text);
+  line-height:    1.15;
+}
+
+.modalDescription {
+  font-family: var(--font-sans);
+  font-size:   15px;
+  line-height: 1.7;
+  color:       var(--text);
+  opacity:     0.8;
+}
+
+.modalMeta {
+  display:         flex;
+  gap:             32px;
+  flex-wrap:       wrap;
+  padding-top:     20px;
+  border-top:      1px solid var(--border);
+  margin-top:      8px;
+}
+
+.modalMetaItem {
+  display:        flex;
+  flex-direction: column;
+  gap:            4px;
+}
+
+.modalMetaLabel {
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  letter-spacing: 0.2em;
+  color:          var(--text-muted);
+  text-transform: uppercase;
+}
+
+.modalMetaValue {
+  font-family:  var(--font-sans);
+  font-size:    13px;
+  font-weight:  500;
+  color:        var(--text);
+}
+
+.modalGithubBtn {
+  display:         inline-flex;
+  align-items:     center;
+  align-self:      flex-start;
+  gap:             6px;
+  padding:         12px 24px;
+  margin-top:      8px;
+  font-family:     var(--font-mono);
+  font-size:       10px;
+  font-weight:     700;
+  letter-spacing:  0.18em;
+  text-transform:  uppercase;
+  color:           var(--bg);
+  background:      var(--text);
+  border:          1px solid var(--text);
+  text-decoration: none;
+  transition:      all 0.25s ease;
+}
+
+.modalGithubBtn:hover {
+  background:   transparent;
+  color:        var(--text);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — TABLET (≤1024px)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .topbar,
+  .heroContent,
+  .projectsHeader,
+  .contactInner,
+  .aboutInner {
+    padding-left:  32px;
+    padding-right: 32px;
+  }
+
+  .pillars {
+    right: 32px;
+  }
+
+  .homeIdentity {
+    right: 32px;
+    top: 84px;
+  }
+
+  .carouselViewport {
+    padding-left: 32px;
+  }
+
+  .sliderTrack {
+    padding-right: 32px;
+    gap: 18px;
+  }
+
+  .projectCard {
+    width: clamp(280px, 42vw, 400px);
+  }
+
+  /* About: collapse to 2-col on tablet (left | right, no center gap) */
+  .aboutColumns {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px 48px;
+  }
+
+  /* Hide the empty center spacer on tablet — not needed in 2-col */
+  .aboutColumns > div[aria-hidden="true"] {
+    display: none;
+  }
+
+  /* Skills */
+  .skillsSection {
+    padding: 80px 32px;
+  }
+
+  .skillsGrid {
+    gap: 24px;
+  }
+
+  .skillCategoryCard {
+    padding: 28px 24px 32px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE (≤768px)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Topbar */
+  .topbar {
+    padding: 16px 20px;
+    align-items: center;
+  }
+
+  .topLeft {
+    gap: 12px;
+  }
+
+  .logoName { display: none; }
+  .topDivider { display: none; }
+
+  .homeIdentity {
+    right: 20px;
+    top: 66px;
+    font-size: 8.5px;
+    line-height: 1.5;
+  }
+
+  .topRight {
+    gap: 0;
+    align-items: center;
+  }
+
+  /* Home */
+  .homeSection {
+    min-height: 100svh;
+  }
+
+  .heroContent {
+    padding: 0 20px 24px;
+  }
+
+  .heroMeta {
+    gap: 8px;
+  }
+
+  .metaDivider { display: none; }
+  .metaCoord   { display: none; }
+
+  /* Pillars — hide on mobile, too cramped */
+  .pillars {
+    display: none;
+  }
+
+  /* About */
+  .aboutSection {
+    min-height: auto;
+  }
+
+  .aboutInner {
+    padding: 80px 20px 60px;
+    gap: 28px;
+  }
+
+  .aboutTitle {
+    font-size: clamp(2.6rem, 13vw, 4.5rem);
+  }
+
+  /* Mobile: collapse 3-col to 1-col */
+  .aboutColumns {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .aboutColumns > div[aria-hidden="true"] {
+    display: none;
+  }
+
+  /* Projects — carousel adjustments */
+  .projectsSection {
+    padding: 60px 0 40px;
+  }
+
+  .projectsHeader {
+    padding:        0 20px 20px;
+    flex-direction: column;
+    align-items:    flex-start;
+    gap:            12px;
+  }
+
+  .carouselViewport {
+    padding-left: 20px;
+  }
+
+  .sliderTrack {
+    padding-right: 20px;
+    gap: 14px;
+  }
+
+  .projectCard {
+    width: min(80vw, 320px);
+  }
+
+  .cardImage {
+    height: clamp(160px, 42vw, 220px);
+  }
+
+  /* Skills */
+  .skillsSection {
+    padding: 60px 20px;
+  }
+
+  .skillsInner {
+    gap: 36px;
+  }
+
+  .skillsGrid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .skillCategoryCard {
+    padding: 24px 20px 28px;
+    border-radius: 16px;
+  }
+
+  /* Contact */
+  .contactSection {
+    min-height: auto;
+  }
+
+  .contactInner {
+    padding: 80px 20px 60px;
+    gap: 36px;
+  }
+
+  .contactTitle {
+    font-size: clamp(3rem, 14vw, 5rem);
+  }
+
+  .submitBtn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Menu overlay */
+  .menuOverlay {
+    padding: 20px 24px;
+  }
+
+  .menuNavLink {
+    font-size: clamp(2.2rem, 11vw, 4rem);
+    gap: 14px;
+  }
+
+  /* Modal */
+  .modal {
+    width:      96vw;
+    max-height: 92vh;
+    top:        50%;
+  }
+
+  .modalContent {
+    padding: 24px 20px 32px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — SMALL MOBILE (≤480px)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .topbar {
+    padding: 14px 16px;
+  }
+
+  .homeIdentity {
+    right: 16px;
+    top: 58px;
+    font-size: 8px;
+    line-height: 1.45;
+  }
+
+  .heroContent {
+    padding: 0 16px 20px;
+  }
+
+  .aboutInner,
+  .contactInner {
+    padding-left:  16px;
+    padding-right: 16px;
+  }
+
+  .skillsSection {
+    padding: 50px 16px;
+  }
+
+  .skillCategoryCard {
+    padding: 20px 16px 24px;
+  }
+
+  .skillName {
+    font-size: 14px;
+  }
+
+  .skillPercent {
+    font-size: 12px;
+  }
+
+  .projectsHeader {
+    padding-left:  16px;
+    padding-right: 16px;
+  }
+
+  .carouselViewport {
+    padding-left: 16px;
+  }
+
+  .sliderTrack {
+    padding-right: 16px;
+  }
+
+  .projectCard {
+    width: min(85vw, 280px);
+  }
+
+  .menuOverlay {
+    padding: 16px 18px;
+  }
+
+  .menuNavLink {
+    font-size: clamp(1.9rem, 10vw, 3rem);
+    gap: 10px;
+  }
+}
