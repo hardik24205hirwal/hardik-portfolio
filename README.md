@@ -1,6 +1,6 @@
 # HARDIK HIRWAL — Personal Portfolio (MERN Stack)
 
-A personal portfolio website migrated from Next.js + TypeScript to the **MERN Stack** (MongoDB, Express.js, React.js, Node.js) using **Vite** and **JavaScript / JSX**.
+A personal portfolio website made using **MERN Stack** (MongoDB, Express.js, React.js, Node.js) using **Vite** and **JavaScript / JSX**.
 
 ---
 
