@@ -1689,9 +1689,10 @@
   }
 
   .contactTitle {
-    font-size: clamp(2.8rem, 12vw, 5rem);
-    letter-spacing: -0.055em;
+    font-size: clamp(2.5rem, 10.5vw, 4.5rem);
+    letter-spacing: -0.06em;
     max-width: 100%;
+    width: 100%;
     white-space: nowrap;
   }
 }
