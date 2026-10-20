@@ -106,11 +106,16 @@ export function Portfolio() {
   const mouseCur = useRef({ x: 0, y: 0 });
 
   /* ── Theme init ─────────────────────────────────────────── */
-  useEffect(() => {
-    const saved = localStorage.getItem('theme') || 'day';
-    setTheme(saved);
-    document.documentElement.setAttribute('data-theme', saved);
-  }, []);
+useEffect(() => {
+  const isMobileOrTablet = window.matchMedia('(max-width: 1024px)').matches;
+
+  const saved = isMobileOrTablet
+    ? 'night'
+    : (localStorage.getItem('theme') || 'day');
+
+  setTheme(saved);
+  document.documentElement.setAttribute('data-theme', saved);
+}, []);
 
   const toggleTheme = useCallback(() => {
     setTheme((prev) => {

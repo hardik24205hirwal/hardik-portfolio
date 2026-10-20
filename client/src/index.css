@@ -157,3 +157,13 @@ button {
     scroll-behavior: auto !important;
   }
 }
+/* ── Mobile fix: prevent HARDIK from being clipped ───────── */
+@media (max-width: 480px) {
+  .huge-name {
+    font-size: clamp(3rem, 17vw, 5.5rem);
+    letter-spacing: -0.06em;
+    max-width: 100%;
+    width: 100%;
+    white-space: nowrap;
+  }
+}

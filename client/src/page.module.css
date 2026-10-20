@@ -1684,7 +1684,14 @@
   }
 
   .menuNavLink {
-    font-size: clamp(1.9rem, 10vw, 3rem);
+    font-size: clamp(1.8rem, 9vw, 3rem);
     gap: 10px;
+  }
+
+  .contactTitle {
+    font-size: clamp(2.8rem, 12vw, 5rem);
+    letter-spacing: -0.055em;
+    max-width: 100%;
+    white-space: nowrap;
   }
 }
